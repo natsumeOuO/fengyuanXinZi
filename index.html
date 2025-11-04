@@ -2,11 +2,35 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-<meta name="robots" content="noindex, nofollow">
-<meta name="googlebot" content="noindex, nofollow">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="googlebot" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>薪資單查詢</title>
   <style>
+    /* ---- 全頁置中樣式 ---- */
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #fff;
+    }
+
+    /* ---- 外層容器 ---- */
+    .container {
+      width: 90%;
+      max-width: 700px;
+      text-align: center;
+    }
+
+    /* ---- LOGO ---- */
+    .logo {
+      width: 180px;
+      margin-bottom: 20px;
+    }
+
     /* ---- 表格樣式 ---- */
     table {
       width: 100%;
@@ -14,11 +38,11 @@
     }
 
     td {
-      width: 25%; /* 調整單元格寬度 */
-      height: 40px; /* 固定高度 */
+      width: 25%;
+      height: 40px;
       text-align: center;
       vertical-align: middle;
-      font-size: 1.2em; /* 增加字體大小 */
+      font-size: 1.2em;
       word-wrap: break-word;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -26,31 +50,32 @@
 
     /* ---- 標題樣式 ---- */
     h2 {
-      font-size: 1.8em; /* 增加標題字體大小 */
+      font-size: 1.8em;
       text-align: center;
     }
 
     /* ---- 輸入區域樣式 ---- */
     .input-container {
       margin-bottom: 10px;
+      text-align: left;
     }
 
     /* ---- 錯誤訊息樣式 ---- */
     .error {
       color: red;
       font-weight: bold;
-      font-size: 1.1em; /* 增加錯誤訊息字體大小 */
+      font-size: 1.1em;
     }
 
     /* ---- 說明文字樣式 ---- */
     .description {
-      font-size: 1.1em; /* 增加說明文字字體大小 */
+      font-size: 1.1em;
       color: black;
     }
 
     /* ---- 進度條樣式 ---- */
     #progress-bar-container {
-      display: none; /* 預設隱藏進度條 */
+      display: none;
       width: 100%;
       background-color: #f3f3f3;
       border: 1px solid #ccc;
@@ -61,7 +86,7 @@
     }
 
     #progress-bar {
-      width: 0%; /* 初始寬度為 0% */
+      width: 0%;
       height: 100%;
       background-color: #007bff;
       text-align: center;
@@ -69,43 +94,59 @@
       line-height: 20px;
       font-size: 1em;
     }
+
+    /* ---- 結果表格強化 ---- */
+    #result table {
+      border: 2px solid #007bff;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+
+    #result td {
+      padding: 8px;
+      border: 1px solid #ccc;
+    }
   </style>
 </head>
 <body>
-  <!-- ---- 薪資單查詢表單 ---- -->
-  <form id="payrollForm" onsubmit="fetchPaySlip(); return false;">
-    <div class="input-container">
-      <label for="idNumber">身分證字號：</label>
-      <input type="text" id="idNumber" placeholder="例：A123456789" style="font-size: 1.2em;">
-    </div>
-    <div class="input-container">
-      <label for="birthDate">出生年月日：</label>
-      <input type="text" id="birthDate" placeholder="例：0780702" style="font-size: 1.2em;">
-      <div class="description">例：民國78年7月2日，請填0780702。</div>
-    </div>
-    <div class="input-container">
-      <label for="month">薪資單月份：</label>
-      <input type="text" id="month" placeholder="例：11312" style="font-size: 1.2em;">
-      <div class="description">例：民國114年01月薪資，請填11401。(目前僅提供113年11月起薪資單)
-</div>
-※當月薪資單請於次月10日下午查詢，遇假日順延至星期一。
-</div>
-    </div>
-    <div>
-      <button type="submit" style="font-size: 1.2em;">查詢薪資單</button>
-    </div>
-  </form>
+  <div class="container">
+    <!-- ---- LOGO 區 ---- -->
+    <img class="logo" src="https://drive.google.com/uc?export=view&id=1HTbpu7U5YeGPPAAXphbtQikOMfiFGBat" alt="公司LOGO">
 
-  <!-- ---- 進度條顯示區域 ---- -->
-  <div id="progress-bar-container">
-    <div id="progress-bar">查詢中...</div>
+    <!-- ---- 薪資單查詢表單 ---- -->
+    <form id="payrollForm" onsubmit="fetchPaySlip(); return false;">
+      <div class="input-container">
+        <label for="idNumber">身分證字號：</label>
+        <input type="text" id="idNumber" placeholder="例：A123456789" style="font-size: 1.2em;">
+      </div>
+      <div class="input-container">
+        <label for="birthDate">出生年月日：</label>
+        <input type="text" id="birthDate" placeholder="例：0780702" style="font-size: 1.2em;">
+        <div class="description">例：民國78年7月2日，請填0780702。</div>
+      </div>
+      <div class="input-container">
+        <label for="month">薪資單月份：</label>
+        <input type="text" id="month" placeholder="例：11312" style="font-size: 1.2em;">
+        <div class="description">
+          例：民國114年01月薪資，請填11401。(目前僅提供113年11月起薪資單)<br>
+          ※當月薪資單請於次月10日下午查詢，遇假日順延至星期一。
+        </div>
+      </div>
+      <div>
+        <button type="submit" style="font-size: 1.2em;">查詢薪資單</button>
+      </div>
+    </form>
+
+    <!-- ---- 進度條 ---- -->
+    <div id="progress-bar-container">
+      <div id="progress-bar">查詢中...</div>
+    </div>
+
+    <!-- ---- 查詢結果 ---- -->
+    <div id="result"></div>
   </div>
 
-  <!-- ---- 查詢結果顯示區域 ---- -->
-  <div id="result"></div>
-
   <script>
-    /* ---- 查詢薪資單的 JavaScript 代碼 ---- */
     function fetchPaySlip() {
       var id = document.getElementById("idNumber").value;
       var dob = document.getElementById("birthDate").value;
@@ -114,78 +155,69 @@
       var progressBarContainer = document.getElementById("progress-bar-container");
       var progressBar = document.getElementById("progress-bar");
 
-      // 初始化進度條
-      resultDiv.innerHTML = ""; // 清空結果區域
-      progressBarContainer.style.display = "block"; // 顯示進度條
-      progressBar.style.width = "0%"; // 重設進度條為 0%
-      
+      resultDiv.innerHTML = "";
+      progressBarContainer.style.display = "block";
+      progressBar.style.width = "0%";
+
       var progress = 0;
       var progressInterval = setInterval(() => {
-        progress += 10; // 每次增加 10%
-        progressBar.style.width = progress + "%"; // 更新進度條寬度
-        if (progress >= 90) { // 最多達到 90%，等待請求完成後設為 100%
-          clearInterval(progressInterval);
-        }
+        progress += 10;
+        progressBar.style.width = progress + "%";
+        if (progress >= 90) clearInterval(progressInterval);
       }, 100);
 
-      // 身分證字號驗證
       var idPattern = /^[A-Z][12][0-9]{8}$/;
       if (!idPattern.test(id)) {
         resultDiv.innerHTML = "<p class='error'>身分證字號輸入錯誤</p>";
         clearInterval(progressInterval);
-        progressBar.style.width = "0%";
         progressBarContainer.style.display = "none";
         return;
       }
 
-      // 出生年月日驗證
       var dobPattern = /^[0-9]{3}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
       if (!dobPattern.test(dob)) {
         resultDiv.innerHTML = "<p class='error'>出生年月日輸入錯誤。例：民國78年7月2日，請填0780702</p>";
         clearInterval(progressInterval);
-        progressBar.style.width = "0%";
         progressBarContainer.style.display = "none";
         return;
       }
 
-      // 薪資單月份驗證
       var monthPattern = /^[0-9]{3}(0[1-9]|1[0-2])$/;
       if (!monthPattern.test(month)) {
         resultDiv.innerHTML = "<p class='error'>無效日期。例：民國114年01月薪資，請填11401。</p>";
         clearInterval(progressInterval);
-        progressBar.style.width = "0%";
         progressBarContainer.style.display = "none";
         return;
       }
 
-      // 如果驗證通過，開始請求數據
-      var url = "https://script.google.com/macros/s/AKfycbzhRLyYLaey92fZqjv7L25uzA-QLG9iZVHoS4NdiqgbBMVQ2QZ4wtuWCfSE6jeqDqw4XQ/exec?id=" + encodeURIComponent(id) + "&dob=" + encodeURIComponent(dob) + "&month=" + encodeURIComponent(month);
+      var url = "https://script.google.com/macros/s/AKfycbzhRLyYLaey92fZqjv7L25uzA-QLG9iZVHoS4NdiqgbBMVQ2QZ4wtuWCfSE6jeqDqw4XQ/exec?id=" +
+        encodeURIComponent(id) + "&dob=" + encodeURIComponent(dob) + "&month=" + encodeURIComponent(month);
 
       fetch(url)
         .then(response => response.json())
         .then(data => {
-          clearInterval(progressInterval); // 停止進度條
-          progressBar.style.width = "100%"; // 設為 100%
-          progressBarContainer.style.display = "none"; // 隱藏進度條
+          clearInterval(progressInterval);
+          progressBar.style.width = "100%";
+          progressBarContainer.style.display = "none";
 
           if (data.name) {
             var html = "<h2>姓名： " + data.name + "</h2>";
             html += "<h2>薪資單月份： " + month + "</h2>";
             html += "<table border='1' style='table-layout:fixed; width:100%;'>";
-            
+
             data.details.forEach((detail) => {
               if (detail.income.length > 0 || detail.expense.length > 0) {
                 html += "<tr>";
                 if (detail.income[0] === "所得部分" || detail.income[0] === "備註") {
-                  html += "<td colspan='2' style='text-align:center; word-wrap:break-word; font-size:1.2em;'>" + (detail.income[0] || '&nbsp;') + "</td>";
+                  html += "<td colspan='2' style='text-align:center; font-size:1.2em;'>" + (detail.income[0] || '&nbsp;') + "</td>";
                 } else {
-                  html += "<td style='word-wrap:break-word; font-size:1.2em;'>" + (detail.income[0] || '&nbsp;') + "</td><td style='word-wrap:break-word; font-size:1.2em;'>" + (detail.income[1] || '&nbsp;') + "</td>";
+                  html += "<td style='font-size:1.2em;'>" + (detail.income[0] || '&nbsp;') + "</td><td style='font-size:1.2em;'>" + (detail.income[1] || '&nbsp;') + "</td>";
                 }
 
                 if (detail.expense[0] === "支出部分") {
-                  html += "<td colspan='2' style='text-align:center; word-wrap:break-word; font-size:1.2em;'>" + (detail.expense[0] || '&nbsp;') + "</td>";
+                  html += "<td colspan='2' style='text-align:center; font-size:1.2em;'>" + (detail.expense[0] || '&nbsp;') + "</td>";
                 } else {
-                  html += "<td style='word-wrap:break-word; font-size:1.2em;'>" + (detail.expense[0] || '&nbsp;') + "</td><td style='word-wrap:break-word; font-size:1.2em;'>" + (detail.expense[1] || '&nbsp;') + "</td>";
+                  html += "<td style='font-size:1.2em;'>" + (detail.expense[0] || '&nbsp;') + "</td><td style='font-size:1.2em;'>" + (detail.expense[1] || '&nbsp;') + "</td>";
                 }
                 html += "</tr>";
               }
@@ -198,10 +230,9 @@
           }
         })
         .catch(error => {
-          clearInterval(progressInterval); // 停止進度條
-          progressBar.style.width = "0%"; // 設為 0%
-          progressBarContainer.style.display = "none"; // 隱藏進度條
-          resultDiv.innerHTML = "<p class='error'>資料輸入錯誤</p>";
+          clearInterval(progressInterval);
+          progressBarContainer.style.display = "none";
+          resultDiv.innerHTML = "<p class='error'>查詢失敗，請確認輸入是否正確或稍後再試。</p>";
         });
     }
   </script>
