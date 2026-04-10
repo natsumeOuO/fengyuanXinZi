@@ -155,7 +155,13 @@
   </div>
 
 <!-- 🔥 專門下載用薪資單（乾淨版） -->
-<div id="paySlipForDownload" style="position:absolute; left:-9999px; width:700px; background:#fff;"></div>
+<div id="paySlipForDownload" style="
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  width: 700px;
+  background: #fff;
+"></div>
 
 <div id="toast" style="
   display:none;
@@ -294,9 +300,12 @@ function downloadImage() {
   clone.appendChild(watermark);
 
   // 放到畫面外
-  clone.style.position = "fixed";
-  clone.style.left = "-9999px";
-  document.body.appendChild(clone);
+clone.style.position = "fixed";
+clone.style.left = "0";
+clone.style.top = "0";
+clone.style.zIndex = "9999";
+clone.style.background = "#fff";
+document.body.appendChild(clone);
 
   html2canvas(clone, {
     scale: 2,
