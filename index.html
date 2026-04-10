@@ -6,6 +6,7 @@
   <meta name="googlebot" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>~薪資單查詢~</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     /* ---- 全頁置中樣式 ---- */
     body {
@@ -142,9 +143,24 @@
       <div id="progress-bar">查詢中...</div>
     </div>
 
+<!-- 下載按鈕 -->
+<div id="downloadBtnContainer" style="display:none; margin-top:10px;">
+  <button onclick="downloadImage()" style="font-size: 1.2em;">
+    下載本月薪資單
+  </button>
+
+  <!-- 🔔 提示文字 -->
+  <div style="margin-top:6px; font-size:0.9em; color:#888;">
+  ※ 請使用 Chrome / Safari 瀏覽器開啟以確保正常下載功能
+</div>
+</div>
+
     <!-- ---- 查詢結果 ---- -->
     <div id="result"></div>
   </div>
+
+<!-- 🔥 專門下載用薪資單（乾淨版） -->
+<div id="paySlipForDownload" style="position:absolute; left:-9999px; width:700px; background:#fff;"></div>
 
   <script>
     function fetchPaySlip() {
@@ -224,7 +240,11 @@
             });
 
             html += "</table>";
-            resultDiv.innerHTML = html;
+resultDiv.innerHTML = html;
+document.getElementById("paySlipForDownload").innerHTML = html;
+window.currentName = data.name;
+window.currentMonth = month;
+document.getElementById("downloadBtnContainer").style.display = "block";
           } else {
             resultDiv.innerHTML = "<p class='error'>未找到符合的資料</p>";
           }
@@ -235,6 +255,61 @@
           resultDiv.innerHTML = "<p class='error'>查詢失敗，請確認輸入是否正確或稍後再試。</p>";
         });
     }
-  </script>
+function downloadImage() {
+  var original = document.getElementById("paySlipForDownload");
+
+  if (original.innerHTML.trim() === "") {
+    alert("請先查詢薪資單！");
+    return;
+  }
+
+  // ✅ clone（不污染原本畫面）
+  var clone = original.cloneNode(true);
+
+  clone.style.position = "relative";
+  clone.style.backgroundColor = "#ffffff";
+  clone.style.padding = "15px";
+  clone.style.width = "700px";
+
+  // 🔥 浮水印（只加在 clone）
+  var watermark = document.createElement("img");
+  watermark.src = "https://natsumeouo.github.io/fengyuanXinZi/LOGO%E9%80%8F%E6%98%8E%E5%BA%95.png";
+
+  watermark.style.position = "absolute";
+  watermark.style.top = "50%";
+  watermark.style.left = "50%";
+  watermark.style.transform = "translate(-50%, -50%) rotate(-20deg)";
+  watermark.style.width = "70%";
+  watermark.style.opacity = "0.2";
+  watermark.style.pointerEvents = "none";
+
+  clone.appendChild(watermark);
+
+  // 放到畫面外
+  clone.style.position = "fixed";
+  clone.style.left = "-9999px";
+  document.body.appendChild(clone);
+
+  html2canvas(clone, {
+    scale: 2,
+    useCORS: true,
+    backgroundColor: "#ffffff"
+  }).then(canvas => {
+    var link = document.createElement("a");
+
+    link.download =
+      "豐元物業-" +
+      (window.currentName || "未知姓名") +
+      "-" +
+      (window.currentMonth || "") +
+      "薪資單.png";
+
+    link.href = canvas.toDataURL();
+    link.click();
+
+    document.body.removeChild(clone);
+  });
+}
+ </script>
 </body>
 </html>
