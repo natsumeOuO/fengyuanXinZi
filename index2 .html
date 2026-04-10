@@ -157,6 +157,19 @@
 <!-- 🔥 專門下載用薪資單（乾淨版） -->
 <div id="paySlipForDownload" style="position:absolute; left:-9999px; width:700px; background:#fff;"></div>
 
+<div id="toast" style="
+  display:none;
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  padding:12px 16px;
+  border-radius:8px;
+  color:#fff;
+  font-weight:bold;
+  font-size:14px;
+  z-index:9999;
+"></div>
+
   <script>
     function fetchPaySlip() {
       var id = document.getElementById("idNumber").value;
@@ -254,7 +267,7 @@ function downloadImage() {
   var original = document.getElementById("paySlipForDownload");
 
   if (original.innerHTML.trim() === "") {
-    alert("請先查詢薪資單！");
+    showToast("⚠ 下載失敗，請使用瀏覽器開啟網頁下載", "error");
     return;
   }
 
@@ -301,10 +314,29 @@ function downloadImage() {
 
     link.href = canvas.toDataURL();
     link.click();
-
+showToast("✔ 已下載成功", "success");
     document.body.removeChild(clone);
   });
 }
+function showToast(message, type) {
+  var toast = document.getElementById("toast");
+
+  toast.innerText = message;
+  toast.style.display = "block";
+
+  if (type === "success") {
+    toast.style.backgroundColor = "#28a745";
+  } else if (type === "error") {
+    toast.style.backgroundColor = "#dc3545";
+  } else {
+    toast.style.backgroundColor = "#333";
+  }
+
+  setTimeout(() => {
+    toast.style.display = "none";
+  }, 3000);
+}
+
  </script>
 </body>
 </html>
