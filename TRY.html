@@ -110,119 +110,131 @@ function fetchPaySlip() {
   var progressBar = document.getElementById("progress-bar");
 
   resultDiv.innerHTML = "";
-  progressBarContainer.style.display = "block";
-  progressBar.style.width = "40%";
 
-  // 驗證
+  progressBarContainer.style.display = "block";
+  progressBar.style.width = "30%";
+
+  // =====================
+  // 防呆
+  // =====================
   if (!/^[A-Z][12][0-9]{8}$/.test(id)) {
-    resultDiv.innerHTML = "<p class='error'>身分證錯誤</p>";
-    progressBarContainer.style.display = "none";
+    showError("身分證格式錯誤");
     return;
   }
 
   if (!/^[0-9]{3}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/.test(dob)) {
-    resultDiv.innerHTML = "<p class='error'>生日錯誤</p>";
-    progressBarContainer.style.display = "none";
+    showError("出生日期格式錯誤");
     return;
   }
 
   if (!/^[0-9]{3}(0[1-9]|1[0-2])$/.test(month)) {
-    resultDiv.innerHTML = "<p class='error'>月份錯誤</p>";
-    progressBarContainer.style.display = "none";
+    showError("月份格式錯誤");
     return;
   }
 
-  // ⚡ cache
+  // =====================
+  // cache
+  // =====================
   if (monthCache[month]) {
     render(monthCache[month], id, dob, month);
     return;
   }
 
   fetch(month + ".json")
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) throw new Error("JSON not found");
+      return res.json();
+    })
     .then(data => {
+
+      if (!Array.isArray(data)) {
+        throw new Error("JSON格式錯誤");
+      }
+
       monthCache[month] = data;
       render(data, id, dob, month);
     })
-    .catch(() => {
-      resultDiv.innerHTML = "<p class='error'>載入失敗</p>";
-      progressBarContainer.style.display = "none";
+    .catch(err => {
+      console.error(err);
+      showError("資料載入失敗（請檢查檔案）");
     });
 }
 
+// =====================
+// render（安全版）
+// =====================
 function render(data, id, dob, month) {
 
   var resultDiv = document.getElementById("result");
   var progressBarContainer = document.getElementById("progress-bar-container");
   var progressBar = document.getElementById("progress-bar");
 
-  let map = {};
-  data.forEach(i => map[i.id + "_" + i.dob] = i);
+  try {
 
-  let user = map[id + "_" + dob];
+    progressBarContainer.style.display = "none";
 
-  progressBarContainer.style.display = "none";
+    let map = {};
 
-  if (!user) {
-    resultDiv.innerHTML = "<p class='error'>查無資料</p>";
-    return;
+    data.forEach(item => {
+      if (!item) return;
+
+      let key = String(item.id || "").trim() + "_" + String(item.dob || "").trim();
+      map[key] = item;
+    });
+
+    let searchKey = id.trim() + "_" + dob.trim();
+    let user = map[searchKey];
+
+    if (!user) {
+      resultDiv.innerHTML = "<p class='error'>查無資料</p>";
+      return;
+    }
+
+    let html = "<h2>姓名：" + (user.name || "-") + "</h2>";
+    html += "<h3>月份：" + month + "</h3>";
+    html += "<table border='1' style='width:100%;'>";
+
+    (user.details || []).forEach(d => {
+
+      let inc = d?.income || ["", ""];
+      let exp = d?.expense || ["", ""];
+
+      html += "<tr>";
+
+      html += "<td>" + (inc[0] || "&nbsp;") + "</td>";
+      html += "<td>" + (inc[1] || "&nbsp;") + "</td>";
+      html += "<td>" + (exp[0] || "&nbsp;") + "</td>";
+      html += "<td>" + (exp[1] || "&nbsp;") + "</td>";
+
+      html += "</tr>";
+    });
+
+    html += "</table>";
+
+    resultDiv.innerHTML = html;
+
+    document.getElementById("paySlipForDownload").innerHTML = html;
+
+    window.currentName = user.name || "";
+    window.currentMonth = month;
+
+    document.getElementById("downloadBtnContainer").style.display = "block";
+
+  } catch (e) {
+    console.error(e);
+    showError("系統處理錯誤");
   }
-
-  let html = "<h2>" + user.name + "</h2>";
-  html += "<h3>" + month + "</h3>";
-  html += "<table border='1'>";
-
-  user.details.forEach(d => {
-    html += "<tr>";
-
-    if (d.income[0] === "所得部分" || d.income[0] === "備註") {
-      html += "<td colspan='2'>" + d.income[0] + "</td>";
-    } else {
-      html += "<td>" + (d.income[0] || "") + "</td><td>" + (d.income[1] || "") + "</td>";
-    }
-
-    if (d.expense[0] === "支出部分") {
-      html += "<td colspan='2'>" + d.expense[0] + "</td>";
-    } else {
-      html += "<td>" + (d.expense[0] || "") + "</td><td>" + (d.expense[1] || "") + "</td>";
-    }
-
-    html += "</tr>";
-  });
-
-  html += "</table>";
-
-  resultDiv.innerHTML = html;
-  document.getElementById("paySlipForDownload").innerHTML = html;
-
-  window.currentName = user.name;
-  window.currentMonth = month;
-
-  document.getElementById("downloadBtnContainer").style.display = "block";
 }
 
-function downloadImage() {
+// =====================
+// error handler（統一）
+// =====================
+function showError(msg) {
 
-  let el = document.getElementById("paySlipForDownload");
+  document.getElementById("progress-bar-container").style.display = "none";
 
-  let clone = el.cloneNode(true);
-
-  clone.style.position = "fixed";
-  clone.style.left = "-9999px";
-  clone.style.width = "700px";
-  clone.style.background = "#fff";
-
-  document.body.appendChild(clone);
-
-  html2canvas(clone, { scale: 2, useCORS: true }).then(canvas => {
-
-    let a = document.createElement("a");
-    a.download = "薪資單-" + (window.currentName || "") + "-" + window.currentMonth + ".png";
-    a.href = canvas.toDataURL();
-    a.click();
-
-    document.body.removeChild(clone);
-  });
+  document.getElementById("result").innerHTML =
+    "<p class='error'>" + msg + "</p>";
 }
 
 </script>
