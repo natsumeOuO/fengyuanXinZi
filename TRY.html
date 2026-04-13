@@ -6,9 +6,9 @@
   <meta name="googlebot" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>~薪資單查詢~</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
   <style>
-    /* ---- 全頁置中樣式 ---- */
     body {
       display: flex;
       flex-direction: column;
@@ -19,20 +19,17 @@
       background-color: #fff;
     }
 
-    /* ---- 外層容器 ---- */
     .container {
       width: 90%;
       max-width: 700px;
       text-align: center;
     }
 
-    /* ---- LOGO ---- */
     .logo {
       width: 180px;
       margin-bottom: 20px;
     }
 
-    /* ---- 表格樣式 ---- */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -44,41 +41,17 @@
       text-align: center;
       vertical-align: middle;
       font-size: 1.2em;
-      word-wrap: break-word;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
-    /* ---- 標題樣式 ---- */
-    h2 {
-      font-size: 1.8em;
-      text-align: center;
-    }
-
-    /* ---- 輸入區域樣式 ---- */
-    .input-container {
-      margin-bottom: 10px;
-      text-align: left;
-    }
-
-    /* ---- 錯誤訊息樣式 ---- */
     .error {
       color: red;
       font-weight: bold;
-      font-size: 1.1em;
     }
 
-    /* ---- 說明文字樣式 ---- */
-    .description {
-      font-size: 1.1em;
-      color: black;
-    }
-
-    /* ---- 進度條樣式 ---- */
     #progress-bar-container {
       display: none;
       width: 100%;
-      background-color: #f3f3f3;
+      background: #f3f3f3;
       border: 1px solid #ccc;
       margin-top: 10px;
       height: 20px;
@@ -89,273 +62,169 @@
     #progress-bar {
       width: 0%;
       height: 100%;
-      background-color: #007bff;
-      text-align: center;
+      background: #007bff;
       color: white;
-      line-height: 20px;
+      text-align: center;
       font-size: 1em;
-    }
-
-    /* ---- 結果表格強化 ---- */
-    #result table {
-      border: 2px solid #007bff;
-      border-radius: 8px;
-      margin-top: 20px;
-    }
-
-    #result td {
-      padding: 8px;
-      border: 1px solid #ccc;
     }
   </style>
 </head>
+
 <body>
-  <div class="container">
-    <!-- ---- LOGO 區 ---- -->
-    <img class="logo" src="https://natsumeouo.github.io/fengyuanXinZi/LOGO%E9%80%8F%E6%98%8E%E5%BA%95.png" alt="公司LOGO">
+<div class="container">
 
-    <!-- ---- 薪資單查詢表單 ---- -->
-    <form id="payrollForm" onsubmit="fetchPaySlip(); return false;">
-      <div class="input-container">
-        <label for="idNumber">身分證字號：</label>
-        <input type="text" id="idNumber" placeholder="例：A123456789" style="font-size: 1.2em;">
-      </div>
-      <div class="input-container">
-        <label for="birthDate">出生年月日：</label>
-        <input type="text" id="birthDate" placeholder="例：0780702" style="font-size: 1.2em;">
-        <div class="description">例：民國78年7月2日，請填0780702。</div>
-      </div>
-      <div class="input-container">
-        <label for="month">薪資單月份：</label>
-        <input type="text" id="month" placeholder="例：11312" style="font-size: 1.2em;">
-        <div class="description">
-          例：民國114年01月薪資，請填11401。(目前僅提供113年11月起薪資單)<br>
-          ※當月薪資單請於次月10日下午查詢，遇假日順延至星期一。
-        </div>
-      </div>
-      <div>
-        <button type="submit" style="font-size: 1.2em;">查詢薪資單</button>
-      </div>
-    </form>
+  <img class="logo" src="https://natsumeouo.github.io/fengyuanXinZi/LOGO%E9%80%8F%E6%98%8E%E5%BA%95.png">
 
-    <!-- ---- 進度條 ---- -->
-    <div id="progress-bar-container">
-      <div id="progress-bar">查詢中...</div>
-    </div>
+  <form onsubmit="fetchPaySlip(); return false;">
+    <input id="idNumber" placeholder="身分證">
+    <input id="birthDate" placeholder="出生0780702">
+    <input id="month" placeholder="11401">
+    <button type="submit">查詢</button>
+  </form>
 
-<!-- 下載按鈕 -->
-<div id="downloadBtnContainer" style="display:none; margin-top:10px;">
-  <button onclick="downloadImage()" style="font-size: 1.2em;">
-    下載本月薪資單
-  </button>
-
-  <!-- 🔔 提示文字 -->
-  <div style="margin-top:6px; font-size:0.9em; color:#888;">
-  ※ 請使用預設瀏覽器開啟網頁下載
-</div>
-</div>
-
-    <!-- ---- 查詢結果 ---- -->
-    <div id="result"></div>
+  <div id="progress-bar-container">
+    <div id="progress-bar">查詢中...</div>
   </div>
 
-<!-- 🔥 專門下載用薪資單（乾淨版） -->
-<div id="paySlipForDownload" style="position:absolute; left:-9999px; width:700px; background:#fff;"></div>
+  <div id="downloadBtnContainer" style="display:none;">
+    <button onclick="downloadImage()">下載薪資單</button>
+  </div>
 
-  <script>
-    function fetchPaySlip() {
-      var id = document.getElementById("idNumber").value;
-      var dob = document.getElementById("birthDate").value;
-      var month = document.getElementById("month").value;
-      var resultDiv = document.getElementById("result");
-      var progressBarContainer = document.getElementById("progress-bar-container");
-      var progressBar = document.getElementById("progress-bar");
+  <div id="result"></div>
+</div>
 
-      resultDiv.innerHTML = "";
-      progressBarContainer.style.display = "block";
-      progressBar.style.width = "0%";
+<div id="paySlipForDownload" style="position:absolute;left:-9999px;width:700px;"></div>
 
-      var progress = 0;
-      var progressInterval = setInterval(() => {
-        progress += 10;
-        progressBar.style.width = progress + "%";
-        if (progress >= 90) clearInterval(progressInterval);
-      }, 100);
+<script>
 
-      var idPattern = /^[A-Z][12][0-9]{8}$/;
-      if (!idPattern.test(id)) {
-        resultDiv.innerHTML = "<p class='error'>身分證字號輸入錯誤</p>";
-        clearInterval(progressInterval);
-        progressBarContainer.style.display = "none";
-        return;
-      }
+let monthCache = {};
 
-      var dobPattern = /^[0-9]{3}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/;
-      if (!dobPattern.test(dob)) {
-        resultDiv.innerHTML = "<p class='error'>出生年月日輸入錯誤。例：民國78年7月2日，請填0780702</p>";
-        clearInterval(progressInterval);
-        progressBarContainer.style.display = "none";
-        return;
-      }
+function fetchPaySlip() {
 
-      var monthPattern = /^[0-9]{3}(0[1-9]|1[0-2])$/;
-      if (!monthPattern.test(month)) {
-        resultDiv.innerHTML = "<p class='error'>無效日期。例：民國114年01月薪資，請填11401。</p>";
-        clearInterval(progressInterval);
-        progressBarContainer.style.display = "none";
-        return;
-      }
-fetch(month + ".json")
-  .then(res => res.json())
-  .then(data => {
+  var id = document.getElementById("idNumber").value;
+  var dob = document.getElementById("birthDate").value;
+  var month = document.getElementById("month").value;
 
-    var map = {};
-    data.forEach(item => {
-      map[item.id + "_" + item.dob] = item;
-    });
+  var resultDiv = document.getElementById("result");
+  var progressBarContainer = document.getElementById("progress-bar-container");
+  var progressBar = document.getElementById("progress-bar");
 
-    var user = map[id + "_" + dob];
+  resultDiv.innerHTML = "";
+  progressBarContainer.style.display = "block";
+  progressBar.style.width = "40%";
 
-    if (!user) {
-      resultDiv.innerHTML = "<p class='error'>未找到符合的資料</p>";
-      return;
-    }
-
-    // 👉 這裡接回你原本的畫面生成
-    var html = "<h2>姓名： " + user.name + "</h2>";
-    html += "<h2>薪資單月份： " + month + "</h2>";
-    html += "<table border='1' style='table-layout:fixed; width:100%;'>";
-
-    user.details.forEach((detail) => {
-      html += "<tr>";
-
-      if (detail.income[0] === "所得部分" || detail.income[0] === "備註") {
-        html += "<td colspan='2'>" + (detail.income[0] || '&nbsp;') + "</td>";
-      } else {
-        html += "<td>" + (detail.income[0] || '&nbsp;') + "</td><td>" + (detail.income[1] || '&nbsp;') + "</td>";
-      }
-
-      if (detail.expense[0] === "支出部分") {
-        html += "<td colspan='2'>" + (detail.expense[0] || '&nbsp;') + "</td>";
-      } else {
-        html += "<td>" + (detail.expense[0] || '&nbsp;') + "</td><td>" + (detail.expense[1] || '&nbsp;') + "</td>";
-      }
-
-      html += "</tr>";
-    });
-
-    html += "</table>";
-
-    resultDiv.innerHTML = html;
-    document.getElementById("paySlipForDownload").innerHTML = html;
-    window.currentName = user.name;
-    window.currentMonth = month;
-
-    document.getElementById("downloadBtnContainer").style.display = "block";
-  })
-  .catch(err => {
-    resultDiv.innerHTML = "<p class='error'>載入失敗</p>";
-  });
-
-        .then(data => {
-          clearInterval(progressInterval);
-          progressBar.style.width = "100%";
-          progressBarContainer.style.display = "none";
-
-          if (data.name) {
-            var html = "<h2>姓名： " + data.name + "</h2>";
-            html += "<h2>薪資單月份： " + month + "</h2>";
-            html += "<table border='1' style='table-layout:fixed; width:100%;'>";
-
-            data.details.forEach((detail) => {
-              if (detail.income.length > 0 || detail.expense.length > 0) {
-                html += "<tr>";
-                if (detail.income[0] === "所得部分" || detail.income[0] === "備註") {
-                  html += "<td colspan='2' style='text-align:center; font-size:1.2em;'>" + (detail.income[0] || '&nbsp;') + "</td>";
-                } else {
-                  html += "<td style='font-size:1.2em;'>" + (detail.income[0] || '&nbsp;') + "</td><td style='font-size:1.2em;'>" + (detail.income[1] || '&nbsp;') + "</td>";
-                }
-
-                if (detail.expense[0] === "支出部分") {
-                  html += "<td colspan='2' style='text-align:center; font-size:1.2em;'>" + (detail.expense[0] || '&nbsp;') + "</td>";
-                } else {
-                  html += "<td style='font-size:1.2em;'>" + (detail.expense[0] || '&nbsp;') + "</td><td style='font-size:1.2em;'>" + (detail.expense[1] || '&nbsp;') + "</td>";
-                }
-                html += "</tr>";
-              }
-            });
-
-            html += "</table>";
-resultDiv.innerHTML = html;
-document.getElementById("paySlipForDownload").innerHTML = html;
-window.currentName = data.name;
-window.currentMonth = month;
-document.getElementById("downloadBtnContainer").style.display = "block";
-          } else {
-            resultDiv.innerHTML = "<p class='error'>未找到符合的資料</p>";
-          }
-        })
-        .catch(error => {
-          clearInterval(progressInterval);
-          progressBarContainer.style.display = "none";
-          resultDiv.innerHTML = "<p class='error'>查詢失敗，請確認輸入是否正確或稍後再試。</p>";
-        });
-    }
-function downloadImage() {
-  var original = document.getElementById("paySlipForDownload");
-
-  if (original.innerHTML.trim() === "") {
-    alert("請先查詢薪資單！");
+  // 驗證
+  if (!/^[A-Z][12][0-9]{8}$/.test(id)) {
+    resultDiv.innerHTML = "<p class='error'>身分證錯誤</p>";
+    progressBarContainer.style.display = "none";
     return;
   }
 
-  // ✅ clone（不污染原本畫面）
-  var clone = original.cloneNode(true);
+  if (!/^[0-9]{3}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])$/.test(dob)) {
+    resultDiv.innerHTML = "<p class='error'>生日錯誤</p>";
+    progressBarContainer.style.display = "none";
+    return;
+  }
 
-  clone.style.position = "relative";
-  clone.style.backgroundColor = "#ffffff";
-  clone.style.padding = "15px";
-  clone.style.width = "700px";
+  if (!/^[0-9]{3}(0[1-9]|1[0-2])$/.test(month)) {
+    resultDiv.innerHTML = "<p class='error'>月份錯誤</p>";
+    progressBarContainer.style.display = "none";
+    return;
+  }
 
-  // 🔥 浮水印（只加在 clone）
-  var watermark = document.createElement("img");
-  watermark.src = "https://natsumeouo.github.io/fengyuanXinZi/LOGO%E9%80%8F%E6%98%8E%E5%BA%95.png";
+  // ⚡ cache
+  if (monthCache[month]) {
+    render(monthCache[month], id, dob, month);
+    return;
+  }
 
-  watermark.style.position = "absolute";
-  watermark.style.top = "50%";
-  watermark.style.left = "50%";
-  watermark.style.transform = "translate(-50%, -50%) rotate(-20deg)";
-  watermark.style.width = "70%";
-  watermark.style.opacity = "0.2";
-  watermark.style.pointerEvents = "none";
+  fetch(month + ".json")
+    .then(res => res.json())
+    .then(data => {
+      monthCache[month] = data;
+      render(data, id, dob, month);
+    })
+    .catch(() => {
+      resultDiv.innerHTML = "<p class='error'>載入失敗</p>";
+      progressBarContainer.style.display = "none";
+    });
+}
 
-  clone.appendChild(watermark);
+function render(data, id, dob, month) {
 
-  // 放到畫面外
+  var resultDiv = document.getElementById("result");
+  var progressBarContainer = document.getElementById("progress-bar-container");
+  var progressBar = document.getElementById("progress-bar");
+
+  let map = {};
+  data.forEach(i => map[i.id + "_" + i.dob] = i);
+
+  let user = map[id + "_" + dob];
+
+  progressBarContainer.style.display = "none";
+
+  if (!user) {
+    resultDiv.innerHTML = "<p class='error'>查無資料</p>";
+    return;
+  }
+
+  let html = "<h2>" + user.name + "</h2>";
+  html += "<h3>" + month + "</h3>";
+  html += "<table border='1'>";
+
+  user.details.forEach(d => {
+    html += "<tr>";
+
+    if (d.income[0] === "所得部分" || d.income[0] === "備註") {
+      html += "<td colspan='2'>" + d.income[0] + "</td>";
+    } else {
+      html += "<td>" + (d.income[0] || "") + "</td><td>" + (d.income[1] || "") + "</td>";
+    }
+
+    if (d.expense[0] === "支出部分") {
+      html += "<td colspan='2'>" + d.expense[0] + "</td>";
+    } else {
+      html += "<td>" + (d.expense[0] || "") + "</td><td>" + (d.expense[1] || "") + "</td>";
+    }
+
+    html += "</tr>";
+  });
+
+  html += "</table>";
+
+  resultDiv.innerHTML = html;
+  document.getElementById("paySlipForDownload").innerHTML = html;
+
+  window.currentName = user.name;
+  window.currentMonth = month;
+
+  document.getElementById("downloadBtnContainer").style.display = "block";
+}
+
+function downloadImage() {
+
+  let el = document.getElementById("paySlipForDownload");
+
+  let clone = el.cloneNode(true);
+
   clone.style.position = "fixed";
   clone.style.left = "-9999px";
+  clone.style.width = "700px";
+  clone.style.background = "#fff";
+
   document.body.appendChild(clone);
 
-  html2canvas(clone, {
-    scale: 2,
-    useCORS: true,
-    backgroundColor: "#ffffff"
-  }).then(canvas => {
-    var link = document.createElement("a");
+  html2canvas(clone, { scale: 2, useCORS: true }).then(canvas => {
 
-    link.download =
-      "豐元物業-" +
-      (window.currentName || "未知姓名") +
-      "-" +
-      (window.currentMonth || "") +
-      "薪資單.png";
-
-    link.href = canvas.toDataURL();
-    link.click();
+    let a = document.createElement("a");
+    a.download = "薪資單-" + (window.currentName || "") + "-" + window.currentMonth + ".png";
+    a.href = canvas.toDataURL();
+    a.click();
 
     document.body.removeChild(clone);
   });
 }
- </script>
+
+</script>
 </body>
 </html>
